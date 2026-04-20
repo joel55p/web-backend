@@ -1,0 +1,13 @@
+# Binarios compilados
+*.exe
+*.out
+
+# Archivos de entorno
+.env
+
+# Bases de datos locales
+*.db
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
