@@ -78,11 +78,11 @@ func handle(conn net.Conn, db *sql.DB) { //va a recibir la conexión TCP y la co
 	switch { //aqui va a estar la logica para decidir que handler llamar segun el metodo y la ruta
 	// GET /series para  listar todas
 	case method == "GET" && path == "/series":
-		response = handleGetAll(db, fullPath)
+		response = handleTodos(db, fullPath)
 
 	// GET /series/:id para obtener una
 	case method == "GET" && segments[0] == "series" && seriesID != "":
-		response = handleGetOne(db, seriesID)
+		response = handleUno(db, seriesID)
 
 	// POST /series para  crear nueva serie
 	case method == "POST" && path == "/series":
