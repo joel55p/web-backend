@@ -1,13 +1,17 @@
-# Binarios compilados
+# Binario compilado (el nombre es el modulo de mi go.mod)
+web-backend
 *.exe
 *.out
-
-# Archivos de entorno
+ 
+# Variables de entorno (si en el futuro agregas PostgreSQL o secrets)
 .env
-
-# Bases de datos locales
+ 
+# Base de datos SQLite local (cada quien tiene la suya)
 *.db
-
+ 
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+ 
+# Archivos de Zone.Identifier que genera Windows al descargar archivos
+*.Zone.Identifier
