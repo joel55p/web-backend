@@ -60,10 +60,14 @@ func handle(conn net.Conn, db *sql.DB) { //va a recibir la conexión TCP y la co
 	// CORS: responder OPTIONS preflight antes de enviar realmente la request 
 	// El navegador manda OPTIONS antes de POST/PUT/DELETE cuando el origen es diferente para verificar que el servidor permite esa operación.
 	if method == "OPTIONS" {
-		conn.Write([]byte(corsHeaders() + "HTTP/1.1 204 No Content\r\n\r\n"))
+		conn.Write([]byte(
+			"HTTP/1.1 204 No Content\r\n" +
+			"Access-Control-Allow-Origin: *\r\n" +
+			"Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n" +
+			"Access-Control-Allow-Headers: Content-Type\r\n\r\n",
+		))
 		return
 	}
-
 	// Router: extraer ID si la ruta es /series/:id 
 	// Ejemplos: /series -> id=""  |  /series/3 -> id="3" en este caso
 	var response string // Aquí es donde se va a decidir qué handler llamar según el método y la ruta
@@ -101,40 +105,39 @@ func handle(conn net.Conn, db *sql.DB) { //va a recibir la conexión TCP y la co
 	}
 
 	// Escribir respuesta con headers CORS incluidos
-	conn.Write([]byte(corsHeaders() + response)) // Siempre incluimos los headers CORS para permitir que el frontend pueda consumir esta API desde otro origen
+	//(los CORS ya van dentro del response):
+	conn.Write([]byte(response))
 
 	//Manda la respuesta HTTP al cliente, incluyendo los headers CORS para que el navegador no bloquee la peticion.
 
 }
 
-// corsHeaders devuelve los headers necesarios para que el navegador permita fetch() desde otro origen(en README se explica mejor)
-func corsHeaders() string {
-	return "Access-Control-Allow-Origin: *\r\n" +
-		"Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n" +
-		"Access-Control-Allow-Headers: Content-Type\r\n"
-}
+
 
 // jsonResponse construye una respuesta HTTP con status code y body JSON
 func jsonResponse(status int, body string) string {
-	statusText := map[int]string{
-		200: "OK",
-		201: "Created",
-		204: "No Content",
-		400: "Bad Request",
-		404: "Not Found",
-		500: "Internal Server Error",
-	}
-	text := statusText[status] 
-	if text == "" {
-		text = "OK"
-	}
+    statusText := map[int]string{
+        200: "OK",
+        201: "Created",
+        204: "No Content",
+        400: "Bad Request",
+        404: "Not Found",
+        500: "Internal Server Error",
+    }
+    text := statusText[status]
+    if text == "" {
+        text = "OK"
+    }
 
-	if status == 204 {
-		// 204 no tiene body
-		return "HTTP/1.1 204 No Content\r\nContent-Type: application/json\r\n\r\n"
-	}
+    // La linea de status va PRIMERO, luego CORS headers, luego Content-Type
+    header := "HTTP/1.1 " + strconv.Itoa(status) + " " + text + "\r\n" +
+        "Access-Control-Allow-Origin: *\r\n" +
+        "Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n" +
+        "Access-Control-Allow-Headers: Content-Type\r\n" +
+        "Content-Type: application/json\r\n\r\n"
 
-	return "HTTP/1.1 " + strconv.Itoa(status) + " " + text + "\r\n" + // Siempre se responde  con Content-Type application/json porque el frontend espera JSON(aun pa errores)
-		"Content-Type: application/json\r\n\r\n" +
-		body
+    if status == 204 {
+        return header  // 204 sin body
+    }
+    return header + body
 }
