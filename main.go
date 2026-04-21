@@ -22,7 +22,7 @@ func main() {
 		name TEXT NOT NULL,
 		current_episode INTEGER NOT NULL DEFAULT 1,
 		total_episodes INTEGER NOT NULL,
-		image_url TEXT,
+		image_url TEXT
 	)`)
 	if err != nil {
 		log.Fatal("Error creando tabla:", err)
