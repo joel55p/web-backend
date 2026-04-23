@@ -2,8 +2,17 @@ Series Tracker — Backend
 API REST construida en Go puro (sin frameworks externos) con SQLite como base de datos. Expone endpoints JSON que consume el frontend.
 
 
---------------Link al Frontend----------------
+--------------Link al repo de Frontend----------------
 https://github.com/joel55p/web-frontend.git 
+
+
+
+-------------Link al Backend publicado en Railway-------------------------
+https://web-backend-production-1dfb.up.railway.app 
+
+
+---------Link al Frontend publicado en Vercel -------------------
+https://web-frontend-chi-five.vercel.app 
 
 
 -------Screenshot de Aplicacion funcionando----------------
