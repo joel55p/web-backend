@@ -1,0 +1,88 @@
+Series Tracker — Backend
+API REST construida en Go puro (sin frameworks externos) con SQLite como base de datos. Expone endpoints JSON que consume el frontend.
+
+
+--------------Link al Frontend----------------
+https://github.com/joel55p/web-frontend.git 
+
+
+-------Screenshot de Aplicacion funcionando----------------
+
+
+
+
+----------¿Cómo correr el proyecto localmente?----------------------
+
+Requisitos
+
+1. Go 1.25 o superior
+2. Git
+
+Pasos
+
+-git clone https://github.com/joel55p/web-backend
+-cd web-backend
+-go mod download
+-go run .
+
+El servidor arranca en http://localhost:8080. Entonces  para  verificar que funciona con:
+-curl http://localhost:8080/series 
+Te tendria que mostrar una lista vacia  [] si la base de datos esta vacia.
+
+------------Endpoints de la API------------------------
+
+Metodo|     Ruta      |       descripcion           |       codigo Respuesta
+GET        /series          Lista todas las series              200
+GET         /series/:id     Obtener series por ID               200 o 404
+POST        /sereis         Crear una seria nueva               201
+PUT         /series/:id     Edit serie que existe               200/404
+DELETE      /series/:id     Eliminar serie                      204/404
+
+
+-----------------Estructura del proyecto--------------------------------
+web-backend/
+├── main.go          # Punto de entrada, conexion a DB y servidor TCP
+├── handler.go       # Router principal, parseo de requests HTTP, CORS
+├── models.go        # Structs Serie y SerieInput, validacion, helpers JSON
+├── handleTodos.go   # GET /series — lista con busqueda, orden y paginacion
+├── handleUno.go     # GET /series/:id
+├── handleCreate.go  # POST /series
+├── handleUpdate.go  # PUT /series/:id
+├── handleDelete.go  # DELETE /series/:id
+├── Dockerfile       # Para deploy en Railway
+├── go.mod
+├── go.sum
+└── README.md
+
+
+
+
+
+---------------- CORS-------------------------------
+CORS (Cross-Origin Resource Sharing) es una politica de seguridad del navegador que bloquea peticiones fetch() hacia un origen diferente (distinto puerto o dominio). Por lo que Se configuraron los headers Access-Control-Allow-Origin: * en cada respuesta y se maneja el preflight OPTIONS para que el frontend pueda consumir la API sin restricciones.
+Qué significa
+
+- Cuando el frontend  quiere hacer un POST, PUT o DELETE hacia un backend en otro dominio, el navegador no manda la petición directamente. sino que primero envía una petición especial con el método OPTIONS.
+- Esa petición pregunta al servidor:
+- ¿Qué métodos (POST, PUT, DELETE) estan permitidos?
+- ¿Qué cabeceras personalizadas puedo usar?
+- ¿Qué orígenes están autorizados?
+
+Si el servidor responde con las cabeceras correctas (Access-Control-Allow-Origin, Access-Control-Allow-Methods, etc.), entonces el navegador procede a mandar la peticion real (POST, PUT, etc).
+
+--------Challenges implementados------------
+
+1. Códigos HTTP correctos — 201 al crear, 204 al eliminar, 404 si no existe, 400 en input inválido (20 pts)
+2. Validación server-side con respuestas de error en JSON descriptivas (20 pts)
+3. Búsqueda por nombre con ?q= (15 pts)
+4. Ordenamiento con ?sort= y ?order=asc|desc (15 pts)
+5. Paginación con ?page= y ?limit= (30 pts)
+6.  Calidad visual del cliente — ¿Se ve como una app real o como una tarea? 
+7. Calidad del historial de Git — commits descriptivos, progresión lógica, no un solo commit con todo
+8. Organización del código — archivos separados con responsabilidades claras, en ambos repositorios
+
+Reflexión
+Para este proyecto usé Go sin ningún framework, construyendo el servidor HTTP desde cero sobre TCP con el paquete net de la librería estandar. Fue una experiencia muy diferente ya que nunca habia realmente trabajado fronted y backend asi por mi mismo por loque  tuve que parsear manualmente la request line, los headers y el body, entender como es que  funciona el protocolo HTTP por debajo, y manejar CORS sin ninguna librería que lo abstraiga.
+Creo que lo que mas me causo inconveniente fue  debuggear el error de ERR_INVALID_HTTP_RESPONSE que resulto ser un problema de orden en los headers HTTP, Ya que los headers CORS estaban llegando antes de la línea de status, lo cual es inválido en HTTP. Entender por qué el navegador rechazaba la respuesta me hizo entender mucho mejor cómo funciona el protocolo.
+Ahora bien pasando a la base de datos SQLite fue una buena elección para este proyecto ya que realmente fue cero configuración, el archivo de la base de datos vive junto al código, y modernc.org/sqlite permite usarlo en Go sin dependencias de C como vimos en clase. Para un proyecto más grande con múltiples instancias o muchas escrituras concurrentes usaría PostgreSQL que es lo que estamos viendo en bases de datos, pero para un tracker personal SQLite cumple bien.
+¿Lo usaría de nuevo? Go sí, definitivamente me gusto. Ahora bien  construir el servidor desde TCP no lo haria realmente la unica razon por la que lo hice asi fue porque me base en el code que tenia del lab5 de series tracker, ahora bien  en un proyecto real usaría net/http  que tambien obviamente lo vimos en clsae, de la librería estándar o un framework liviano, pero fue muy valioso hacerlo una vez para entender qué hace un servidor HTTP internamente.
