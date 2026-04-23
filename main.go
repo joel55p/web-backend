@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net"
+	"os"
 
 	_ "modernc.org/sqlite"
 )
@@ -28,8 +29,15 @@ func main() {
 		log.Fatal("Error creando tabla:", err)
 	}
 
+
+
+	port := os.Getenv("PORT")
+    if port == "" {
+        port = "8080"
+    }
+
 	// Escuchar en el puerto 8080
-	listener, err := net.Listen("tcp", ":8080")
+	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatal("Error iniciando servidor:", err)
 	}
